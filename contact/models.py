@@ -1,33 +1,19 @@
-from sqlalchemy.sql import func
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, TIMESTAMP, Integer, Boolean
-
-BASE = declarative_base()
+from core.database import BASE
+from datetime import datetime, timezone
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, DateTime, Integer, Boolean
 
 class Contact(BASE):
     __tablename__ = "contact_form"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(30))
+    surname: Mapped[str] = mapped_column(String(30))
+    fullname: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    email: Mapped[str] = mapped_column(String(255))
+    phone: Mapped[str] = mapped_column(String(17))
+    message: Mapped[str] = mapped_column(String(255))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    name = Column(String(30))
-    surname = Column(String(30))
-
-    fullname = Column(String(60), nullable=True)
-
-    email = Column(String(255))
-    phone = Column(String(17))
-
-    message = Column(String(255))
-
-    is_active = Column(Boolean, default=True)
-
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.timezone('UTC', func.now()))
-    updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.timezone('UTC', func.now()))
-
-    def __init__(self, name, surname, fullname, email, phone, message):
-        self.name = name 
-        self.surname = surname 
-        self.fullname = fullname 
-        self.email = email 
-        self.phone = phone
-        self.message = message
+    created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))

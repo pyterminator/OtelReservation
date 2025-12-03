@@ -1,6 +1,8 @@
 from uvicorn import run
 from fastapi import FastAPI
-from contact.routers import router as contact_router
+from auth.routers import router as auth_router
+from fastapi.middleware.cors import CORSMiddleware
+# from contact.routers import router as contact_router
 
 app = FastAPI(
     swagger_ui_parameters = { 
@@ -9,7 +11,23 @@ app = FastAPI(
     title="Otel Reservation"
 )
 
-app.include_router(contact_router, prefix="/contact", tags=["Contact Form"])
+origins = [
+    "http://localhost:3000", 
+    "http://localhost:8000", 
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, 
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"], 
+)
+
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+# app.include_router(contact_router, prefix="/contact", tags=["Contact Form"])
 
 if __name__ == "__main__":
     run(app="index:app", port=8000, host="127.0.0.1", reload=True)
