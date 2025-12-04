@@ -1,5 +1,5 @@
+from datetime import datetime
 from core.database import BASE
-from datetime import datetime, timezone
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, DateTime, Integer, Boolean
 
@@ -15,5 +15,5 @@ class Contact(BASE):
     message: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    updated_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)

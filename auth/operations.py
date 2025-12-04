@@ -2,7 +2,6 @@ from typing import List
 from sqlalchemy import select
 from auth.models import User, UserRole
 from core.database import AsyncSessionLocal
-# from sqlalchemy.ext.asyncio import AsyncSession
 
 async def create_new_user(
     username:str,
@@ -28,7 +27,7 @@ async def create_new_user(
 
                 session.add(new_user)
                 return new_user
-            except Exception as e:
+            except:
                 await session.rollback()
                 return None
 
@@ -37,6 +36,17 @@ async def get_user(email:str) -> User | None:
     async with AsyncSessionLocal() as session:
         async with session.begin():
             statement = select(User).where(User.email == email)
+            result = await session.execute(statement)
+            existing_user = result.scalar_one_or_none()
+
+            if existing_user: return existing_user
+
+            return None
+
+async def get_user_by_id(id:int) -> User | None:
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            statement = select(User).where(User.id == id)
             result = await session.execute(statement)
             existing_user = result.scalar_one_or_none()
 

@@ -1,72 +1,58 @@
-# from typing import List
-# from contact.models import Contact 
-# from core.database import db_session
-# import contact.decoder as DataDecoder
+from typing import List
+from sqlalchemy import select, func
+from contact.models import Contact
+from contact.schemes import ValidateData
+from core.database import AsyncSessionLocal 
 
-# #
-# ##
-# ### ---> CRUD operations for 'contact form'
-# ##
-# #
 
-# # Create new
-# def create_new(
-#         name: str,
-#         surname: str,
-#         fullname: str,
-#         email:str,
-#         phone:str,
-#         message:str,
-#     ) -> bool:
-#     try:
-#         new_contact_message = Contact()
-#         new_contact_message.name = name 
-#         new_contact_message.surname = surname 
-#         new_contact_message.fullname = fullname 
-#         new_contact_message.email = email 
-#         new_contact_message.phone = phone 
-#         new_contact_message.message = message
+async def create_new_contact_message(data: ValidateData) -> Contact | None:
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            try:
+               new_contact_message = Contact(
+                   name = data.name,
+                   surname = data.surname,
+                   fullname = data.name + " " + data.surname,
+                   email = data.email,
+                   phone = data.phone,
+                   message = data.message
+               )
+               session.add(new_contact_message)
+               return new_contact_message
+            except:
+                await session.rollback()
+                return None
 
-#         db_session.add(new_contact_message)
-#         db_session.commit()
-#         return True
-#     except Exception as e:
-#         return False
 
-# # Get all as obj
-# def get_all_as_objects() -> List[Contact] | None:
-#     try:
-#         data = db_session.query(Contact).all()
-#         return data 
-#     except: return None
+async def get_all_contact_messages(limit: int, offset: int) -> List[Contact]:
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            total_result = await session.execute(select(func.count(Contact.id)))
+            total_count = total_result.scalar()
 
-# # Get all as dict
-# def get_all_as_dict() -> List[dict] | None:
-#     try:
-#         data = get_all_as_objects()
-#         data = DataDecoder.decode_contact_objects(data)
-#         return data 
-#     except: return None
+            stmt = (
+                select(Contact)
+                .order_by(Contact.id.desc())
+                .limit(limit)
+                .offset(offset)
+            )
 
-# # Get one as obj
-# def get_one_as_obj(id:int)-> Contact | None:
-#     try:
-#         criteria = {"_id": id}
-#         obj = db_session.query(Contact).filter_by(**criteria).first()
-#         if obj:
-#             return obj
-#         return None
-#     except: return None
+            result = await session.execute(stmt)
+            contacts = result.scalars().all()
 
-# # Get one as dict
-# def get_one_as_dict(id:int)-> dict | None:
-#     try:
-#         obj = get_one_as_obj(id)
-#         if obj:
-#             obj_to_dict = DataDecoder.decode_contact_obj(obj) 
-#             return obj_to_dict
-#         return None
-#     except: return None
+            return contacts, total_count
+
+
+async def get_contact_message(id: int) -> Contact | None:
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            stmt = select(Contact).where((Contact.id == id))
+            result = await session.execute(stmt)
+            existing_contact_message = result.scalar_one_or_none()
+            if existing_contact_message:
+                return existing_contact_message
+            return None
+
 
 # # Update contact message
 # def update_message(

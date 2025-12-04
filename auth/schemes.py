@@ -66,3 +66,6 @@ class LoginData(BaseModel):
         if not EmailChecker.check_email(email): 
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-poçt formatı səhvdir")
         return email 
+
+class ValidateRefreshToken(BaseModel):
+    refresh_token: str

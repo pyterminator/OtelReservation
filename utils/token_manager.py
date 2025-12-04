@@ -1,5 +1,6 @@
 import os 
 from jose import jwt 
+from auth import operations
 from auth.models import User
 from dotenv import load_dotenv
 from datetime import timedelta, datetime, timezone
@@ -40,8 +41,8 @@ class TokenManager:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             user_id: int = payload.get("id")
-            if user_id:
-                user = await User.get_or_none(id=user_id)
+            if user_id: 
+                user = await operations.get_user_by_id(id=user_id)
                 if not user: raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="İstifadəçi tapılmadı!")
                 return user
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token-də problem oldu")

@@ -1,10 +1,10 @@
 import enum
 from sqlalchemy import Enum
+from datetime import datetime 
 from core.database import BASE
-from datetime import datetime, timezone
+from utils.hashing import Hash
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean, DateTime
-from utils.hashing import Hash
 
 class UserRole(enum.Enum):
     USER = "user"
@@ -20,14 +20,15 @@ class User(BASE):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    # created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    # updated_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
-
     created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     updated_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def set_password(self, raw_password: str):
         self._password = Hash.encrypt(raw_password)
+    
+    @property
+    def get_password(self):
+        return self._password
 
     @property
     def password(self):
