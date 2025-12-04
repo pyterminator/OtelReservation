@@ -28,3 +28,4 @@ AsyncSessionLocal = sessionmaker(
 )
 
 # alembic revision --autogenerate -m "add role to users"
+# alembic upgrade head

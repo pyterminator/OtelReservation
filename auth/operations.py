@@ -1,4 +1,3 @@
-from typing import List
 from sqlalchemy import select
 from auth.models import User, UserRole
 from core.database import AsyncSessionLocal

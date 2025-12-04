@@ -9,6 +9,7 @@ load_dotenv()
 from core.database import BASE
 from contact.models import Contact 
 from auth.models import User
+from vacancy.models import VacancyApplication
 
 target_metadata = BASE.metadata 
 
