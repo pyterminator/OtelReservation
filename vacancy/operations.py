@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from vacancy.models import VacancyApplication
 from core.database import AsyncSessionLocal
 
