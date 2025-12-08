@@ -22,7 +22,9 @@ async def create_new(
                     cv_filesize=cv_filesize
                 )
                 session.add(new_apply)
+                await session.flush()
+                await session.refresh(new_apply)
                 return new_apply
-            except:
+            except Exception as e:
                 await session.rollback()
-                return None
+                raise e

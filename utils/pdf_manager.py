@@ -1,27 +1,34 @@
-import os
+import os 
+import aiofiles
+from core.settings import STATIC_DIR
 from fastapi import UploadFile, HTTPException, status
 
 
-async def save_pdf(cv_file: UploadFile, file_name: str) -> tuple[str, str] | None:
+async def save_pdf(cv_file: UploadFile, file_name: str, max_size: int = 10) -> tuple[str, str] | None:
     try:
         if cv_file.content_type != "application/pdf": 
-            raise Exception("Yalnız PDF faylı göndərilə bilər")
+            raise ValueError("Fayl PDF formatında deyil")
 
         file_bytes = await cv_file.read()
         file_size_mb = round(len(file_bytes) / (1024 * 1024), 2)
 
-        if file_size_mb > 10:
-            raise Exception("PDF faylın həcmi maksimum 10MB olmalıdır")
+        if not file_bytes.startswith(b"%PDF"): 
+            raise ValueError("Fayl PDF formatında deyil")
 
-        file_path = os.path.join(os.getcwd(), "static_files", file_name)
+        if file_size_mb > max_size: 
+            raise ValueError(f"PDF faylın həcmi maksimum {max_size}MB olmalıdır")
 
-        with open(file_path, "wb+") as f:
-            f.write(file_bytes)
+        file_path = os.path.join(STATIC_DIR, file_name)
+
+        async with aiofiles.open(file_path, "wb") as f:
+            await f.write(file_bytes)
 
         return file_path, file_size_mb
 
-    except Exception as e:
-        raise HTTPException( status_code=status.HTTP_400_BAD_REQUEST, detail=f"{e}")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Server xətası (PDF saxlanmadı)")
 
 
 async def delete_pdf(file_path: str) -> bool:
