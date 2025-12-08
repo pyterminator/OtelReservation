@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from utils.mml_checker import name_checker, surname_checker
 from utils.email_manager import EmailChecker
 from utils.phone_manager import PhoneChecker
 from pydantic import BaseModel, EmailStr, field_validator
@@ -12,16 +13,16 @@ class ValidateApplyVacancy(BaseModel):
     # Name Validator
     @field_validator("name")
     def check_name(cls, name:str):
-        if len(name) < 3 or len(name) > 30:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ad minimum 3, maksimum 30 simvoldan ibarət olmalıdır")
-        return name.strip().title()
+        try: name = name_checker(name)
+        except Exception as e: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{e}")
+        return name
 
     # Surname Validator
     @field_validator("surname")
     def check_surname(cls, surname:str):
-        if len(surname) < 3 or len(surname) > 30:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Soyad minimum 3, maksimum 30 simvoldan ibarət olmalıdır")
-        return surname.strip().title()
+        try: surname = surname_checker(surname)
+        except Exception as e: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{e}")
+        return surname
 
     # Email validator
     @field_validator("email")

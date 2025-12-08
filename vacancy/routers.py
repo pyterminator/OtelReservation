@@ -1,3 +1,4 @@
+import uuid
 from vacancy import operations
 from utils.pdf_manager import save_pdf, delete_pdf
 from vacancy.schemes import ValidateApplyVacancy
@@ -28,8 +29,8 @@ async def apply_cv_vacancy(
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail=f"{e}"
         )
-    
-    result = await save_pdf(cv_file, data)
+    file_name = data.name.lower() + "_" + data.surname.lower() + "_cv_." + f"{uuid.uuid4()}" + ".pdf"
+    result = await save_pdf(cv_file, file_name)
     
     if not result:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fayl saxlamaq mümkün olmadı")
