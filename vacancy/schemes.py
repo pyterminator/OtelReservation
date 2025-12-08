@@ -1,3 +1,4 @@
+from typing import List 
 from utils.email_manager import EmailChecker
 from utils.phone_manager import PhoneChecker
 from pydantic import BaseModel, EmailStr, field_validator
@@ -35,3 +36,16 @@ class ValidateApplyVacancy(BaseModel):
         if not PhoneChecker.check_phone(phone):
             raise ValueError("Yanlış telefon formatıdır")
         return phone
+
+class ShowApplication(BaseModel):
+    fullname: str 
+    email: str 
+    phone: str 
+    cv_filename: str 
+    cv_filesize: str
+
+class ShowAllApplicationsWithPagination(BaseModel):
+    total: int 
+    page: int 
+    limit: int 
+    items: List[ShowApplication]

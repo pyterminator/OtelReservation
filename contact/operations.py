@@ -1,6 +1,6 @@
 from typing import List
-from sqlalchemy import select, func
 from contact.models import Contact
+from sqlalchemy import select, func
 from contact.schemes import ValidateData
 from core.database import AsyncSessionLocal 
 
