@@ -10,6 +10,7 @@ from core.database import BASE
 from contact.models import Contact 
 from auth.models import User
 from vacancy.models import VacancyApplication
+from therapy.models import Therapy
 
 target_metadata = BASE.metadata 
 
@@ -56,3 +57,4 @@ if context.is_offline_mode(): run_migrations_offline()
 else: run_migrations_online()
 
 # alembic revision --autogenerate -m "initial tables"
+# alembic upgrade head

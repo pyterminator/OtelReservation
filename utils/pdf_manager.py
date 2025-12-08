@@ -1,7 +1,7 @@
 import os 
 import aiofiles
 from core.settings import STATIC_DIR
-from fastapi import UploadFile, HTTPException, status
+from fastapi import UploadFile, HTTPException
 
 
 async def save_pdf(cv_file: UploadFile, file_name: str, max_size: int = 10) -> tuple[str, str] | None:
@@ -18,7 +18,8 @@ async def save_pdf(cv_file: UploadFile, file_name: str, max_size: int = 10) -> t
         if file_size_mb > max_size: 
             raise ValueError(f"PDF faylın həcmi maksimum {max_size}MB olmalıdır")
 
-        file_path = os.path.join(STATIC_DIR, file_name)
+        # file_path = os.path.join(STATIC_DIR, file_name)
+        file_path = os.path.abspath(os.path.join(STATIC_DIR, "pdf", file_name))
 
         async with aiofiles.open(file_path, "wb") as f:
             await f.write(file_bytes)

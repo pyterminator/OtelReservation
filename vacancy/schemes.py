@@ -28,8 +28,7 @@ class ValidateApplyVacancy(BaseModel):
         if not EmailChecker.check_email(email):
             raise ValueError("Yanlış e-poçt formatıdır")
         return email
-    
-    
+
     # Phone Validator
     @field_validator("phone")
     def check_phone(cls, phone):
@@ -38,6 +37,7 @@ class ValidateApplyVacancy(BaseModel):
         return phone
 
 class ShowApplication(BaseModel):
+    id: int
     fullname: str 
     email: str 
     phone: str 

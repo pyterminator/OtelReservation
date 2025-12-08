@@ -14,7 +14,7 @@ async def apply_cv_vacancy(
         surname: str = Form(...),
         email: str = Form(...),
         phone: str = Form(...),
-        cv_file: UploadFile = File()
+        cv_file: UploadFile = File(...)
     ):
     try:
         data = ValidateApplyVacancy( name=name, surname=surname, email=email, phone=phone )
@@ -27,7 +27,7 @@ async def apply_cv_vacancy(
     result = await save_pdf(cv_file, file_name)
     
     if not result:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fayl saxlamaq mümkün olmadı")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Faylı saxlamaq mümkün olmadı")
 
     file_path, file_size_mb = result
 
