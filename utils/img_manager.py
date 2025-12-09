@@ -11,6 +11,14 @@ async def save_image(img_file: UploadFile, file_name: str, max_size: int = 5) ->
             "image/webp": [b"RIFF"],             # WEBP (RIFF header)
         }
 
+        mime_to_ext = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp",
+        }
+
+        ext = mime_to_ext[img_file.content_type]
+
         if img_file.content_type not in allowed_types:
             raise ValueError("Şəkil formatı düzgün deyil (yalnız JPEG, PNG, WEBP)")
 
@@ -30,17 +38,19 @@ async def save_image(img_file: UploadFile, file_name: str, max_size: int = 5) ->
         if file_size_mb > max_size:
             raise ValueError(f"Şəkil maksimum {max_size}MB olmalıdır")
 
-        file_path = os.path.abspath(os.path.join(STATIC_DIR, "images", file_name+img_file.content_type))
+        file_path = os.path.abspath(os.path.join(STATIC_DIR, "images", file_name+ext))
+        file_url = f"/static/images/{file_name+ext}"
 
         async with aiofiles.open(file_path, "wb") as f:
             await f.write(file_bytes)
 
-        return file_path, file_size_mb
+        return file_url, file_size_mb
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    except Exception:
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Server xətası (Şəkil saxlanmadı)")
 
 async def delete_image(file_path: str) -> bool:

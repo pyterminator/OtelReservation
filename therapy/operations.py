@@ -26,3 +26,21 @@ async def create_new_therapy(
             except Exception as e:
                 await session.rollback()
                 raise e
+
+async def get_all_therapies(limit: int, offset: int) -> List[Therapy]:
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            total_result = await session.execute(select(func.count(Therapy.id)))
+            total_count = total_result.scalar()
+
+            stmt = (
+                select(Therapy)
+                .order_by(Therapy.id.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+
+            result = await session.execute(stmt)
+            therapies = result.scalars().all()
+
+            return therapies, total_count

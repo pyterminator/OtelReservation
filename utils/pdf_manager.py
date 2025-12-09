@@ -20,11 +20,12 @@ async def save_pdf(cv_file: UploadFile, file_name: str, max_size: int = 10) -> t
 
         # file_path = os.path.join(STATIC_DIR, file_name)
         file_path = os.path.abspath(os.path.join(STATIC_DIR, "pdf", file_name))
+        file_url = f"/static/pdf/{file_name}"
 
         async with aiofiles.open(file_path, "wb") as f:
             await f.write(file_bytes)
 
-        return file_path, file_size_mb
+        return file_url, file_size_mb
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

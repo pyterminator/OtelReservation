@@ -1,5 +1,6 @@
 from uvicorn import run
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from auth.routers import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -28,8 +29,8 @@ app.add_middleware(
     allow_methods=["*"], 
     allow_headers=["*"], 
 )
-
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.mount("/static", StaticFiles(directory="static_files"), name="static")
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(contact_router, prefix="/contact", tags=["Contact Form"])

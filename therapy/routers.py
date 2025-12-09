@@ -1,8 +1,10 @@
 import uuid
-from therapy.schemes import ValidateTherapy
-from fastapi import APIRouter, Form, UploadFile, File, HTTPException
-from utils.img_manager import save_image, delete_image
 from therapy import operations
+from auth.models import User, UserRole
+from therapy.schemes import ValidateTherapy, ShowAllTherapiesWithPagination, ShowTherapy
+from utils.token_manager import TokenManager
+from utils.img_manager import save_image, delete_image
+from fastapi import APIRouter, Form, UploadFile, File, HTTPException, Depends, status, Query
 
 router = APIRouter()
 
@@ -10,8 +12,13 @@ router = APIRouter()
 async def create_new_therapy(
     title: str = Form(...),
     description: str = Form(...),
-    image: UploadFile = File(...)
+    image: UploadFile = File(...),
+    user: User = Depends(TokenManager.get_current_user)
 ):
+    
+    if user.role != UserRole.ADMIN: 
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="İcazəsiz cəhd")
+
     try:
         data = ValidateTherapy(title=title, description=description)
     except Exception as e:
@@ -38,14 +45,28 @@ async def create_new_therapy(
     
     return new_therapy
 
-@router.get('/')
-async def get_therapies():
-    ...
+@router.get('/', status_code=200, response_model=ShowAllTherapiesWithPagination)
+async def get_therapies(
+    user: User = Depends(TokenManager.get_current_user),
+    limit: int = Query(10, ge=1, le=100),
+    page: int = Query(1, ge=1)
+):
+    if limit not in (10, 50):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Pagination üçün limit 10 və ya 50 olmalıdır")
 
-@router.put('/{id}')
-async def update_therapy():
-    ...
+    if user.role != UserRole.ADMIN: 
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="İcazəsiz cəhd")
 
-@router.delete('/{id}')
-async def delete_therapy():
-    ...
+    offset = (page - 1) * limit
+    items, total = await operations.get_all_therapies(limit=limit, offset=offset)
+
+    return {"total": total, "page": page, "limit": limit, "items": items}
+
+
+# @router.put('/{id}')
+# async def update_therapy():
+#     ...
+
+# @router.delete('/{id}')
+# async def delete_therapy():
+#     ...
